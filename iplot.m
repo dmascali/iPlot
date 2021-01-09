@@ -37,6 +37,8 @@ cfg.nVariable = nVariable;
 cfg.labels = labels;
 cfg.lnwidths = [0.2 0.4 0.6 0.8 1 1.2 1.4 1.6 1.8 2 2.5 3 4];
 cfg.lnwidthsIndx = find(cfg.lnwidths==1);
+cfg.ylim_mode = 'auto'; %auto or lock
+cfg.ylim = [];
 %----------------------------
 
 % print help screen
@@ -80,6 +82,15 @@ switch event.Key
             case {false}
                 legend(cfg.labels,'location','best');
                 cfg.showingLegend = true;
+        end
+    %----------------------lock ylim---------------------------------------    
+    case {'e'}
+        switch cfg.ylim_mode
+            case {'auto'} 
+               cfg.ylim_mode = 'lock';
+               cfg.ylim = get(gca,'ylim');
+            case {'lock'}
+               cfg.ylim_mode = 'auto'; 
         end
     %----------------------linewidth---------------------------------------
     case {'equal'}
@@ -169,6 +180,10 @@ switch cfg.type
         %TODO
 end
 ylabel(['Column ',num2str(cfg.indx)],'Fontweight','bold');
+switch cfg.ylim_mode
+    case {'lock'}
+        ylim(cfg.ylim);
+end
 box on;
 return
 end
