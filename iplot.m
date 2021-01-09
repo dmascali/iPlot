@@ -41,7 +41,8 @@ end
 cfg.showing = '';
 cfg.showingLegend = false;
 cfg.type = 'raw'; %raw or fft
-cfg.mode = 'seq'; %seq, random, std
+cfg.mode = {'seq','random'};%,'stdA','stdD'}; %seq, random, std
+cfg.columns = 1:1:s(2);
 cfg.indx = 0;
 cfg.indx_max = s(2); %number of columns
 cfg.row_number = s(1); %number of rows
@@ -91,6 +92,21 @@ switch event.Key
                 cfg.type = 'raw';
                 plot_column(cfg,varargin{:});
         end
+    %----------------------------modality----------------------------------
+    case {'r'} %switch bettwen seq, random, std...
+        cfg.mode = circshift(cfg.mode,1);
+        switch cfg.mode{1}
+            case {'seq'}
+                cfg.columns = 1:1:cfg.indx_max;
+                %resest index
+                cfg.indx = 0;
+                print_title(cfg)
+            case {'random'}
+                cfg.columns = randperm(cfg.indx_max);
+                cfg.indx = 0;
+                print_title(cfg)
+            case {'std'}
+        end
     %--------------------------legend--------------------------------------    
     case {'l'}
         switch cfg.showingLegend
@@ -128,8 +144,8 @@ switch event.Key
             case {'help'}
                 %if it was already on help, go back to what previously
                 %plotted
-                plot_column(cfg,varargin{:});  
                 cfg.showing = 'data';
+                plot_column(cfg,varargin{:});  
             otherwise
                 help_screen;
                 cfg.showing = 'help';
@@ -153,7 +169,11 @@ if strcmp(cfg.showing,'help')
     % do nothing
     return
 end
-title(['Modality: ',cfg.type,' Ylim: ',cfg.ylim_mode]); 
+title(['Modality: \bf',cfg.type,'     \rmColumn ordering: \bf',cfg.mode{1},'     \rmYlim: \bf',cfg.ylim_mode],'fontweight','normal'); 
+try % available in the 
+    ax = gca;
+    ax.TitleHorizontalAlignment = 'left'; ax.TitleHorizontalAlignment = 'left';
+end
 return
 end
 
@@ -182,8 +202,11 @@ return
 end
 
 function cfg = update_cfg_a(cfg)
-if cfg.indx ~= 1
+if cfg.indx > 1
     cfg.indx = cfg.indx -1; 
+end
+if cfg.indx == 0
+    cfg.indx = 1; 
 end
 cfg.showing = 'data';
 return
@@ -200,22 +223,25 @@ end
 
 function plot_column(cfg,varargin)
 clf;
+if cfg.indx <= 0 %take care of odd situations where indx = 0
+    cfg.indx = 1;
+end
 switch cfg.type
     case {'raw'}
         hold on;
         for l = 1:cfg.nVariable
-            plot(varargin{l}(:,cfg.indx),'linewidth',cfg.lnwidths(cfg.lnwidthsIndx));
+            plot(varargin{l}(:,cfg.columns(cfg.indx)),'linewidth',cfg.lnwidths(cfg.lnwidthsIndx));
         end
         hold off;
-        ylabel(['Column ',num2str(cfg.indx)],'Fontweight','bold');
+        ylabel(['Column ',num2str(cfg.columns(cfg.indx))],'Fontweight','bold');
     case {'fft'}
         hold on;
         for l = 1:cfg.nVariable
-            plot(cfg.freq,cfg.fft{l}(:,cfg.indx),'linewidth',cfg.lnwidths(cfg.lnwidthsIndx));
+            plot(cfg.freq,cfg.fft{l}(:,cfg.columns(cfg.indx)),'linewidth',cfg.lnwidths(cfg.lnwidthsIndx));
         end
         hold off;
         xlabel('Frequency');
-        ylabel(['Spectrum: column ',num2str(cfg.indx)],'Fontweight','bold');
+        ylabel(['Spectrum: column ',num2str(cfg.columns(cfg.indx))],'Fontweight','bold');
 end
 
 switch cfg.ylim_mode
