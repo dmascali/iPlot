@@ -41,7 +41,7 @@ end
 cfg.showing = '';
 cfg.showingLegend = false;
 cfg.type = 'raw'; %raw or fft
-cfg.mode = {'seq','random'};%,'stdA','stdD'}; %seq, random, std
+cfg.mode = {'seq','std+','std-','random'};%,'stdA','stdD'}; %seq, random, std
 cfg.columns = 1:1:s(2);
 cfg.indx = 0;
 cfg.indx_max = s(2); %number of columns
@@ -94,7 +94,7 @@ switch event.Key
         end
     %----------------------------modality----------------------------------
     case {'r'} %switch bettwen seq, random, std...
-        cfg.mode = circshift(cfg.mode,1);
+        cfg.mode = circshift(cfg.mode,-1);
         switch cfg.mode{1}
             case {'seq'}
                 cfg.columns = 1:1:cfg.indx_max;
@@ -105,7 +105,16 @@ switch event.Key
                 cfg.columns = randperm(cfg.indx_max);
                 cfg.indx = 0;
                 print_title(cfg)
-            case {'std'}
+            case {'std+'}
+                stds = std(varargin{1});
+                [~,cfg.columns] = sort(stds,'descend');
+                cfg.indx = 0;
+                print_title(cfg)
+            case {'std-'}
+                stds = std(varargin{1});
+                [~,cfg.columns] = sort(stds,'ascend');
+                cfg.indx = 0;
+                print_title(cfg)
         end
     %--------------------------legend--------------------------------------    
     case {'l'}
