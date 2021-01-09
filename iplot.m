@@ -36,7 +36,7 @@ cfg.indx_max = size(varargin{1},2);
 cfg.nVariable = nVariable;
 cfg.labels = labels;
 cfg.lnwidths = [0.2 0.4 0.6 0.8 1 1.2 1.4 1.6 1.8 2 2.5 3 4];
-cfg.lnwidthsIndx = find(cfg.lnwidths==2);
+cfg.lnwidthsIndx = find(cfg.lnwidths==1);
 %----------------------------
 
 % print help screen
@@ -54,13 +54,14 @@ function switcher(src,event,varargin)
 cfg = guidata(src);
 
 switch event.Key
-  
+    %--------------------------navigate------------------------------------
     case {'a'} %backward
         cfg = update_cfg_a(cfg);
         plot_column(cfg,varargin{:});        
     case {'d'} %forward
         cfg = update_cfg_d(cfg);
         plot_column(cfg,varargin{:});
+    %----------------------------raw/fft-----------------------------------
     case {'f'} %switch bettwen raw data plotting and spectrum
         switch cfg.type
             case {'raw'}
@@ -70,6 +71,7 @@ switch event.Key
                 cfg.type = 'raw';
                 plot_column(ts(:,cfg.indx),cfg);
         end
+    %--------------------------legend--------------------------------------    
     case {'l'}
         switch cfg.showingLegend
             case {true} %then toggle off
@@ -79,17 +81,17 @@ switch event.Key
                 legend(cfg.labels,'location','best');
                 cfg.showingLegend = true;
         end
+    %----------------------linewidth---------------------------------------
     case {'equal'}
         cfg = update_lnwd_plus(cfg);
         %update current
-        %set(findall(gcf,'-property','linewidth'),'linewidth',cfg.lnwidths(cfg.lnwidthsIndx))
         lines = findobj(gcf,'Type','Line');
         for l = 1:numel(lines); lines(l).LineWidth = cfg.lnwidths(cfg.lnwidthsIndx); end
     case {'hyphen'}
-        cfg = update_lnwd_minus(cfg);
-        %set(findall(gcf,'-property','linewidth'),'linewidth',cfg.lnwidths(cfg.lnwidthsIndx))      
+        cfg = update_lnwd_minus(cfg);   
         lines = findobj(gcf,'Type','Line');
         for l = 1:numel(lines); lines(l).LineWidth = cfg.lnwidths(cfg.lnwidthsIndx); end
+    %--------------------------help----------------------------------------
     case {'h'}
         switch cfg.showing
             case {'help'}
@@ -101,7 +103,7 @@ switch event.Key
                 help_screen;
                 cfg.showing = 'help';
         end
-        
+    %--------------------------quit----------------------------------------    
     case {'q'}
         close(gcf); 
         return
@@ -167,7 +169,7 @@ switch cfg.type
         %TODO
 end
 ylabel(['Column ',num2str(cfg.indx)],'Fontweight','bold');
-
+box on;
 return
 end
 
