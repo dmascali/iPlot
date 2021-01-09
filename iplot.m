@@ -18,15 +18,19 @@ nVariable = nargin;
 s = size(varargin{1});
 
 %Find out input variable names:
-labels = cell(nVariable,1);
+labels = cell(1,nVariable);
+title_str = [];
 for l = 1:nVariable
     labels{l} = inputname(l);
     if isempty(labels{l})
         labels{l} = ['Input',num2str(l)];
     end
+    title_str = [title_str,', ',labels{l}];
 end
+title_str(1:2) = [];
 
-h = figure;
+figure_title = sprintf(['iPlot - variable(s): ',title_str]);
+h = figure('Name',figure_title,'NumberTitle','off','MenuBar', 'None');
 %initialize config structure
 cfg.showing = '';
 cfg.showingLegend = false;
