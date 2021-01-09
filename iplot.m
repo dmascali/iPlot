@@ -39,7 +39,7 @@ end
 
 %initialize config structure
 cfg.showing = '';
-cfg.showingLegend = false;
+cfg.showingLegend = {false,true};
 cfg.type = 'raw'; %raw or fft
 cfg.mode = {'seq','std+','std-','random'};%,'stdA','stdD'}; %seq, random, std
 cfg.columns = 1:1:s(2);
@@ -53,6 +53,7 @@ cfg.lnwidthsIndx = find(cfg.lnwidths==1);
 cfg.ylim_mode = 'auto'; %auto or lock
 cfg.ylim = [];
 cfg.fft = [];
+cfg.Fs = 1;
 %----------------------------
 
 % print help screen
@@ -118,13 +119,12 @@ switch event.Key
         end
     %--------------------------legend--------------------------------------    
     case {'l'}
-        switch cfg.showingLegend
-            case {true} %then toggle off
-                legend off;
-                cfg.showingLegend = false;
-            case {false}
+        cfg.showingLegend = circshift(cfg.showingLegend,-1);
+        switch cfg.showingLegend{1}
+            case {true} 
                 legend(cfg.labels,'location','best');
-                cfg.showingLegend = true;
+            case {false}
+                legend off;
         end
     %----------------------lock ylim---------------------------------------    
     case {'e'}
@@ -147,6 +147,19 @@ switch event.Key
         cfg = update_lnwd_minus(cfg);   
         lines = findobj(gcf,'Type','Line');
         for l = 1:numel(lines); lines(l).LineWidth = cfg.lnwidths(cfg.lnwidthsIndx); end
+    %----------------------set param---------------------------------------
+    case {'s'}
+        prompt = {'Enter sampling frequency (Hz):'};
+        dlgtitle = 'Set Parameters';
+        dims = [1 35];
+        definput = {'1'};
+        answer = inputdlg(prompt,dlgtitle,dims,definput);
+        cfg.Fs = str2num(answer{1});
+        % update freq:
+        n = 2^nextpow2(cfg.row_number);
+        cfg.freq = 0:(cfg.Fs/n):(cfg.Fs/2);
+        % update plot:
+        plot_column(cfg,varargin{:});   
     %--------------------------help----------------------------------------
     case {'h'}
         switch cfg.showing
@@ -242,7 +255,7 @@ switch cfg.type
             plot(varargin{l}(:,cfg.columns(cfg.indx)),'linewidth',cfg.lnwidths(cfg.lnwidthsIndx));
         end
         hold off;
-        ylabel(['Column ',num2str(cfg.columns(cfg.indx))],'Fontweight','bold');
+        ylabel(['Column \bf',num2str(cfg.columns(cfg.indx)),'/',num2str(cfg.indx_max)],'Fontweight','normal');
     case {'fft'}
         hold on;
         for l = 1:cfg.nVariable
@@ -250,7 +263,7 @@ switch cfg.type
         end
         hold off;
         xlabel('Frequency');
-        ylabel(['Spectrum: column ',num2str(cfg.columns(cfg.indx))],'Fontweight','bold');
+        ylabel(['Spectrum, column \bf',num2str(cfg.columns(cfg.indx)),'/',num2str(cfg.indx_max)],'Fontweight','normal');
 end
 
 switch cfg.ylim_mode
@@ -259,6 +272,14 @@ switch cfg.ylim_mode
 end
 print_title(cfg);
 box on;
+
+switch cfg.showingLegend{1}
+    case {true} 
+        legend(cfg.labels,'location','best');
+    case {false}
+        legend off;
+end
+
 return
 end
 
@@ -276,7 +297,6 @@ Y = abs(Y/cfg.row_number);
 Y = Y(1:n/2+1,:);
 Y(2:end-1,:) = 2*Y(2:end-1,:);
 
-cfg.Fs = 1;
 cfg.freq = 0:(cfg.Fs/n):(cfg.Fs/2);
 
 %split back data
