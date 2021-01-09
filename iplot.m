@@ -15,6 +15,7 @@ if nargin > 1
 end
 % Number of input matrices
 nVariable = nargin;
+s = size(varargin{1});
 
 %Find out input variable names:
 labels = cell(nVariable,1);
@@ -32,13 +33,15 @@ cfg.showingLegend = false;
 cfg.type = 'raw'; %raw or fft
 cfg.mode = 'seq'; %seq, random, std
 cfg.indx = 0;
-cfg.indx_max = size(varargin{1},2);
+cfg.indx_max = s(2); %number of columns
+cfg.row_number = s(1); %number of rows
 cfg.nVariable = nVariable;
 cfg.labels = labels;
-cfg.lnwidths = [0.2 0.4 0.6 0.8 1 1.2 1.4 1.6 1.8 2 2.5 3 4];
+cfg.lnwidths = [0.5 0.6 0.7 0.8 0.9 1 1.2 1.4 1.6 1.8 2 2.5 3 4];
 cfg.lnwidthsIndx = find(cfg.lnwidths==1);
 cfg.ylim_mode = 'auto'; %auto or lock
 cfg.ylim = [];
+cfg.fft = [];
 %----------------------------
 
 % print help screen
@@ -68,10 +71,14 @@ switch event.Key
         switch cfg.type
             case {'raw'}
                 cfg.type = 'fft';
-                plot_column(ts(:,cfg.indx),cfg);
+                %if it's the first call to fft, let's create the spectrum
+                if isempty(cfg.fft)
+                   cfg = calculate_spectrum(cfg,varargin{:}); 
+                end
+                plot_column(cfg,varargin{:});
             case {'fft'}
                 cfg.type = 'raw';
-                plot_column(ts(:,cfg.indx),cfg);
+                plot_column(cfg,varargin{:});
         end
     %--------------------------legend--------------------------------------    
     case {'l'}
@@ -89,8 +96,10 @@ switch event.Key
             case {'auto'} 
                cfg.ylim_mode = 'lock';
                cfg.ylim = get(gca,'ylim');
+               print_title(cfg);
             case {'lock'}
-               cfg.ylim_mode = 'auto'; 
+               cfg.ylim_mode = 'auto';
+               print_title(cfg);
         end
     %----------------------linewidth---------------------------------------
     case {'equal'}
@@ -123,6 +132,15 @@ end
 %update config structure
 guidata(src,cfg);
 
+return
+end
+
+function print_title(cfg)
+if strcmp(cfg.showing,'help')
+    % do nothing
+    return
+end
+title(['Modality: ',cfg.type,' Ylim: ',cfg.ylim_mode]); 
 return
 end
 
@@ -176,18 +194,51 @@ switch cfg.type
             plot(varargin{l}(:,cfg.indx),'linewidth',cfg.lnwidths(cfg.lnwidthsIndx));
         end
         hold off;
+        ylabel(['Column ',num2str(cfg.indx)],'Fontweight','bold');
     case {'fft'}
-        %TODO
+        hold on;
+        for l = 1:cfg.nVariable
+            plot(cfg.freq,cfg.fft{l}(:,cfg.indx),'linewidth',cfg.lnwidths(cfg.lnwidthsIndx));
+        end
+        hold off;
+        xlabel('Frequency');
+        ylabel(['Spectrum: column ',num2str(cfg.indx)],'Fontweight','bold');
 end
-ylabel(['Column ',num2str(cfg.indx)],'Fontweight','bold');
+
 switch cfg.ylim_mode
     case {'lock'}
         ylim(cfg.ylim);
 end
+print_title(cfg);
 box on;
 return
 end
 
+function cfg = calculate_spectrum(cfg,varargin)
+%concantenate matrixes
+y = [];
+for l = 1:cfg.nVariable
+    y = cat(2,y,varargin{l});
+end
+
+n = 2^nextpow2(cfg.row_number);
+
+Y = fft(y,n);
+Y = abs(Y/cfg.row_number);
+Y = Y(1:n/2+1,:);
+Y(2:end-1,:) = 2*Y(2:end-1,:);
+
+cfg.Fs = 1;
+cfg.freq = 0:(cfg.Fs/n):(cfg.Fs/2);
+
+%split back data
+for l = 1:cfg.nVariable
+    cfg.fft{l} = Y(:,(1:cfg.indx_max));
+    Y(:,1:cfg.indx_max) = [];
+end
+
+return
+end
 
  
 
