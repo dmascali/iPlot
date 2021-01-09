@@ -1,4 +1,5 @@
 function iplot(varargin)
+global IPLOT_FIG_POS 
 
 if nargin > 1
     %check dimension consistency among matrices
@@ -30,7 +31,12 @@ end
 title_str(1:2) = [];
 
 figure_title = sprintf(['iPlot - variable(s): ',title_str]);
-h = figure('Name',figure_title,'NumberTitle','off','MenuBar', 'None');
+if isempty(IPLOT_FIG_POS)
+    h = figure('Name',figure_title,'NumberTitle','off','MenuBar', 'None');
+else
+    h = figure('Name',figure_title,'NumberTitle','off','MenuBar', 'None','Position',IPLOT_FIG_POS);
+end
+
 %initialize config structure
 cfg.showing = '';
 cfg.showingLegend = false;
@@ -59,6 +65,7 @@ return
 end
 
 function switcher(src,event,varargin)
+global IPLOT_FIG_POS
 %retrive config structure
 cfg = guidata(src);
 
@@ -129,6 +136,8 @@ switch event.Key
         end
     %--------------------------quit----------------------------------------    
     case {'q'}
+        % before exiting save 
+        IPLOT_FIG_POS = src.Position;
         close(gcf); 
         return
 end
