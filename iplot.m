@@ -11,8 +11,8 @@ function iplot(varargin)
 %  A : plot the previous column
 %  R : toggle between different column ordering:
 %      sequential: from 1 to N (number of columns) {default}
-%      std+      : column sorted by variance (of the first input), ascending 
-%      std-      : column sorted by variance (of the first input), descending 
+%      std+      : column sorted by variance (of the first input), descending 
+%      std-      : column sorted by variance (of the first input), ascending 
 %      random    : random ordering 
 %
 % Plotting mode:
@@ -363,7 +363,7 @@ switch cfg.type
             plot(cfg.freq,cfg.fft{l}(:,cfg.columns(cfg.indx)),'linewidth',cfg.lnwidths(cfg.lnwidthsIndx));
         end
         hold off;
-        xlabel('Frequency');
+        xlabel(['Frequency (Hz) [sampling freq=',num2str(cfg.Fs),'Hz]']);
         ylabel(['Spectrum, column \bf',num2str(cfg.columns(cfg.indx)),'/',num2str(cfg.indx_max)],'Fontweight','normal');
 end
 
