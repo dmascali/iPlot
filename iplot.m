@@ -304,6 +304,7 @@ switch cfg.type
         end
         hold off;
         ylabel(['Column \bf',num2str(cfg.columns(cfg.indx)),'/',num2str(cfg.indx_max)],'Fontweight','normal');
+        xlim([0 cfg.row_number]);
     case {'fft'}
         hold on;
         for l = 1:cfg.nVariable
