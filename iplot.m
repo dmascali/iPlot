@@ -76,10 +76,10 @@ switch event.Key
     %--------------------------navigate------------------------------------
     case {'a'} %backward
         cfg = update_cfg_a(cfg);
-        plot_column(cfg,varargin{:});        
+        cfg = plot_column(cfg,varargin{:});        
     case {'d'} %forward
         cfg = update_cfg_d(cfg);
-        plot_column(cfg,varargin{:});
+        cfg = plot_column(cfg,varargin{:});
     %----------------------------raw/fft-----------------------------------
     case {'f'} %switch bettwen raw data plotting and spectrum
         switch cfg.type
@@ -89,10 +89,10 @@ switch event.Key
                 if isempty(cfg.fft)
                    cfg = calculate_spectrum(cfg,varargin{:}); 
                 end
-                plot_column(cfg,varargin{:});
+                cfg = plot_column(cfg,varargin{:});
             case {'fft'}
                 cfg.type = 'raw';
-                plot_column(cfg,varargin{:});
+                cfg = plot_column(cfg,varargin{:});
         end
     %----------------------------modality----------------------------------
     case {'r'} %switch bettwen seq, random, std...
@@ -160,7 +160,7 @@ switch event.Key
         n = 2^nextpow2(cfg.row_number);
         cfg.freq = 0:(cfg.Fs/n):(cfg.Fs/2);
         % update plot:
-        plot_column(cfg,varargin{:});   
+        cfg = plot_column(cfg,varargin{:});   
     %--------------------------help----------------------------------------
     case {'h'}
         switch cfg.showing
@@ -168,7 +168,7 @@ switch event.Key
                 %if it was already on help, go back to what previously
                 %plotted
                 cfg.showing = 'data';
-                plot_column(cfg,varargin{:});  
+                cfg = plot_column(cfg,varargin{:});  
             otherwise
                 help_screen;
                 cfg.showing = 'help';
@@ -289,7 +289,7 @@ set(gca,'Xtick',[],'Ytick',[], 'XtickLabel',{},'YtickLabel',{},'box','on');
 return
 end
 
-function plot_column(cfg,varargin)
+function cfg = plot_column(cfg,varargin)
 clf;
 if cfg.indx <= 0 %take care of odd situations where indx = 0
     cfg.indx = 1;
