@@ -238,7 +238,52 @@ end
 function cfg = help_screen(cfg)
 cfg.showing = 'help';
 clf;
-text(0.5, 0.5,'HELP');
+% plot functions in backgroun
+x = 0:0.1:4*pi;
+y = [4*sin(x);3*sin(2*x);2*sin(3*x);1*sin(4*x)]';
+plot(x,y,'linewidth',1.5);
+ylim([-13, 4.5]);
+xlim([0, x(end)]);
+%----------------------------
+%title
+text(0.5, 0.8,'\bfiPlot','FontSize',40,'HorizontalAlignment','center', 'Units', 'Normalized');
+text(0.5, 0.70,'Interactive Plot','FontSize',20,'HorizontalAlignment','center', 'Units', 'Normalized');
+
+%legend help
+text(0.5, 0.47,'\bfKeyboard Map','FontSize',12,'HorizontalAlignment','center', 'Units', 'Normalized');
+
+%left_colulm
+lf_entry_x = 0.05+0.1;
+lf_entry_title_x = lf_entry_x -0.015; 
+
+rh_entry_x = 0.55+0.1;
+rh_entry_title_x = rh_entry_x -0.015; 
+
+%common
+deltay = 0.05; %interline
+entry_start_y = 0.4;
+entry_fontsize = 12;
+
+%left column
+text(lf_entry_title_x, entry_start_y-0.*deltay,'\bf\itNavigate through columns','FontSize',entry_fontsize,'HorizontalAlignment','left', 'Units', 'Normalized');
+text(lf_entry_x, entry_start_y-1.*deltay,'D - move forward','FontSize',entry_fontsize,'HorizontalAlignment','left', 'Units', 'Normalized');
+text(lf_entry_x, entry_start_y-2.*deltay,'A - move backward','FontSize',entry_fontsize,'HorizontalAlignment','left', 'Units', 'Normalized');
+text(lf_entry_x, entry_start_y-3.*deltay,'R - column ordering:','FontSize',entry_fontsize,'HorizontalAlignment','left', 'Units', 'Normalized');
+text(lf_entry_x, entry_start_y-4.*deltay,'     [sequential/std+/std-/random]','FontSize',entry_fontsize,'HorizontalAlignment','left', 'Units', 'Normalized');
+text(lf_entry_title_x, entry_start_y-5.*deltay,'\bf\itPlotting mode','FontSize',entry_fontsize,'HorizontalAlignment','left', 'Units', 'Normalized');
+text(lf_entry_x, entry_start_y-6.*deltay,'F - raw or spectral amplitude','FontSize',entry_fontsize,'HorizontalAlignment','left', 'Units', 'Normalized');
+text(lf_entry_x, entry_start_y-7.*deltay,'     [raw/fft]','FontSize',entry_fontsize,'HorizontalAlignment','left', 'Units', 'Normalized');
+
+%right column
+text(rh_entry_title_x, entry_start_y-0.*deltay,'\bf\itAppearance','FontSize',entry_fontsize,'HorizontalAlignment','left', 'Units', 'Normalized');
+text(rh_entry_x, entry_start_y-1.*deltay,'E   - ylim [auto/lock]','FontSize',entry_fontsize,'HorizontalAlignment','left', 'Units', 'Normalized');
+text(rh_entry_x, entry_start_y-2.*deltay,'+/- - adjust linewidth','FontSize',entry_fontsize,'HorizontalAlignment','left', 'Units', 'Normalized');
+text(rh_entry_title_x, entry_start_y-3.*deltay,'\bf\itMiscellaneous','FontSize',entry_fontsize,'HorizontalAlignment','left', 'Units', 'Normalized');
+text(rh_entry_x, entry_start_y-4.*deltay,'S - set frequency for fft','FontSize',entry_fontsize,'HorizontalAlignment','left', 'Units', 'Normalized');
+text(rh_entry_x, entry_start_y-5.*deltay,'Q - quit','FontSize',entry_fontsize,'HorizontalAlignment','left', 'Units', 'Normalized');
+text(rh_entry_x, entry_start_y-6.*deltay,'H - show this help','FontSize',entry_fontsize,'HorizontalAlignment','left', 'Units', 'Normalized');
+
+
 set(gca,'Xtick',[],'Ytick',[], 'XtickLabel',{},'YtickLabel',{},'box','on');
 return
 end
