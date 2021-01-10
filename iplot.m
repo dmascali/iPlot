@@ -32,7 +32,8 @@ title_str(1:2) = [];
 
 figure_title = sprintf(['iPlot - variable(s): ',title_str]);
 if isempty(IPLOT_FIG_POS)
-    h = figure('Name',figure_title,'NumberTitle','off','MenuBar', 'None');
+    defpos = get(groot, 'DefaultFigurePosition');
+    h = figure('Name',figure_title,'NumberTitle','off','MenuBar', 'None','Position', [defpos(1) defpos(2)-275 920 695]);
 else
     h = figure('Name',figure_title,'NumberTitle','off','MenuBar', 'None','Position',IPLOT_FIG_POS);
 end
