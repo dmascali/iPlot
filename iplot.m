@@ -74,10 +74,10 @@ cfg = guidata(src);
 
 switch event.Key
     %--------------------------navigate------------------------------------
-    case {'a'} %backward
+    case {'a','leftarrow'} %backward
         cfg = update_cfg_a(cfg);
         cfg = plot_column(cfg,varargin{:});        
-    case {'d'} %forward
+    case {'d','rightarrow'} %forward
         cfg = update_cfg_d(cfg);
         cfg = plot_column(cfg,varargin{:});
     %----------------------------raw/fft-----------------------------------
@@ -89,6 +89,7 @@ switch event.Key
                 if isempty(cfg.fft)
                    cfg = calculate_spectrum(cfg,varargin{:}); 
                 end
+                cfg.showing = 'data';
                 cfg = plot_column(cfg,varargin{:});
             case {'fft'}
                 cfg.type = 'raw';
@@ -96,6 +97,9 @@ switch event.Key
         end
     %----------------------------modality----------------------------------
     case {'r'} %switch bettwen seq, random, std...
+        if strcmp(cfg.showing,'help')
+            return
+        end
         cfg.mode = circshift(cfg.mode,-1);
         switch cfg.mode{1}
             case {'seq'}
@@ -120,6 +124,9 @@ switch event.Key
         end
     %--------------------------legend--------------------------------------    
     case {'l'}
+        if strcmp(cfg.showing,'help')
+            return
+        end
         cfg.showingLegend = circshift(cfg.showingLegend,-1);
         switch cfg.showingLegend{1}
             case {true} 
@@ -129,15 +136,17 @@ switch event.Key
         end
     %----------------------lock ylim---------------------------------------    
     case {'e'}
-        switch cfg.ylim_mode
-            case {'auto'} 
-               cfg.ylim_mode = 'lock';
-               cfg.ylim = get(gca,'ylim');
-               print_title(cfg);
-            case {'lock'}
-               cfg.ylim_mode = 'auto';
-               print_title(cfg);
+        if strcmp(cfg.showing,'help')
+            return
         end
+        switch cfg.ylim_mode
+            case {'auto'}
+                cfg.ylim_mode = 'lock';
+                cfg.ylim = get(gca,'ylim');
+            case {'lock'}
+                cfg.ylim_mode = 'auto';
+        end
+        print_title(cfg);
     %----------------------linewidth---------------------------------------
     case {'equal'}
         cfg = update_lnwd_plus(cfg);
@@ -161,7 +170,9 @@ switch event.Key
             n = 2^nextpow2(cfg.row_number);
             cfg.freq = 0:(cfg.Fs/n):(cfg.Fs/2);
             % update plot:
-            cfg = plot_column(cfg,varargin{:});   
+            if strcmp(cfg.showing,'data')
+                cfg = plot_column(cfg,varargin{:});   
+            end
         end
     %--------------------------help----------------------------------------
     case {'h'}
@@ -249,8 +260,8 @@ ylim([-13, 4.5]);
 xlim([0, x(end)]);
 %----------------------------
 %title
-text(0.5, 0.8,'\bfiPlot','FontSize',40,'HorizontalAlignment','center', 'Units', 'Normalized');
-text(0.5, 0.70,'Interactive Plot','FontSize',20,'HorizontalAlignment','center', 'Units', 'Normalized');
+text(0.5, 0.8,'\bfi\itPlot','FontSize',50,'HorizontalAlignment','center', 'Units', 'Normalized');
+text(0.5, 0.70,'Interactive Plot','FontSize',25,'HorizontalAlignment','center', 'Units', 'Normalized');
 
 %legend help
 text(0.5, 0.47,'\bfKeyboard Map','FontSize',12,'HorizontalAlignment','center', 'Units', 'Normalized');
@@ -280,11 +291,12 @@ text(lf_entry_x, entry_start_y-7.*deltay,'     [raw/fft]','FontSize',entry_fonts
 %right column
 text(rh_entry_title_x, entry_start_y-0.*deltay,'\bf\itAppearance','FontSize',entry_fontsize,'HorizontalAlignment','left', 'Units', 'Normalized');
 text(rh_entry_x, entry_start_y-1.*deltay,'E   - ylim [auto/lock]','FontSize',entry_fontsize,'HorizontalAlignment','left', 'Units', 'Normalized');
-text(rh_entry_x, entry_start_y-2.*deltay,'+/- - adjust linewidth','FontSize',entry_fontsize,'HorizontalAlignment','left', 'Units', 'Normalized');
-text(rh_entry_title_x, entry_start_y-3.*deltay,'\bf\itMiscellaneous','FontSize',entry_fontsize,'HorizontalAlignment','left', 'Units', 'Normalized');
-text(rh_entry_x, entry_start_y-4.*deltay,'S - set frequency for fft','FontSize',entry_fontsize,'HorizontalAlignment','left', 'Units', 'Normalized');
-text(rh_entry_x, entry_start_y-5.*deltay,'Q - quit','FontSize',entry_fontsize,'HorizontalAlignment','left', 'Units', 'Normalized');
-text(rh_entry_x, entry_start_y-6.*deltay,'H - show this help','FontSize',entry_fontsize,'HorizontalAlignment','left', 'Units', 'Normalized');
+text(rh_entry_x, entry_start_y-2.*deltay,'L   - legend [on/off]','FontSize',entry_fontsize,'HorizontalAlignment','left', 'Units', 'Normalized');
+text(rh_entry_x, entry_start_y-3.*deltay,'+/- - adjust linewidth','FontSize',entry_fontsize,'HorizontalAlignment','left', 'Units', 'Normalized');
+text(rh_entry_title_x, entry_start_y-4.*deltay,'\bf\itMiscellaneous','FontSize',entry_fontsize,'HorizontalAlignment','left', 'Units', 'Normalized');
+text(rh_entry_x, entry_start_y-5.*deltay,'S - set frequency for fft','FontSize',entry_fontsize,'HorizontalAlignment','left', 'Units', 'Normalized');
+text(rh_entry_x, entry_start_y-6.*deltay,'Q - quit','FontSize',entry_fontsize,'HorizontalAlignment','left', 'Units', 'Normalized');
+text(rh_entry_x, entry_start_y-7.*deltay,'H - show this help','FontSize',entry_fontsize,'HorizontalAlignment','left', 'Units', 'Normalized');
 
 
 set(gca,'Xtick',[],'Ytick',[], 'XtickLabel',{},'YtickLabel',{},'box','on');
@@ -304,6 +316,7 @@ switch cfg.type
         end
         hold off;
         ylabel(['Column \bf',num2str(cfg.columns(cfg.indx)),'/',num2str(cfg.indx_max)],'Fontweight','normal');
+        xlabel('row');
         xlim([0 cfg.row_number]);
     case {'fft'}
         hold on;
