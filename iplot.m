@@ -155,12 +155,14 @@ switch event.Key
         dims = [1 35];
         definput = {'1'};
         answer = inputdlg(prompt,dlgtitle,dims,definput);
-        cfg.Fs = str2num(answer{1});
-        % update freq:
-        n = 2^nextpow2(cfg.row_number);
-        cfg.freq = 0:(cfg.Fs/n):(cfg.Fs/2);
-        % update plot:
-        cfg = plot_column(cfg,varargin{:});   
+        if ~isempty(answer)
+            cfg.Fs = str2num(answer{1});
+            % update freq:
+            n = 2^nextpow2(cfg.row_number);
+            cfg.freq = 0:(cfg.Fs/n):(cfg.Fs/2);
+            % update plot:
+            cfg = plot_column(cfg,varargin{:});   
+        end
     %--------------------------help----------------------------------------
     case {'h'}
         switch cfg.showing
