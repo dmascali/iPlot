@@ -83,6 +83,7 @@ else
 end
 
 %initialize config structure
+% for cell arrays of strings, the first cell is the current running property
 cfg.showing = '';
 cfg.showingLegend = {false,true};
 cfg.type = 'raw'; %raw or fft
@@ -156,13 +157,23 @@ switch event.Key
                 cfg.indx = 0;
                 print_title(cfg)
             case {'std+'}
-                stds = std(varargin{1});
-                [~,cfg.columns] = sort(stds,'descend');
+                if ~isfield(cfg,'std') %store to improve performance
+                    cfg.std = std(varargin{1});
+                end
+                if ~isfield(cfg,'stdindxPlus') %store to improve performance
+                    [~,cfg.stdindxPlus] = sort(cfg.std,'descend');
+                end                
+                cfg.columns = cfg.stdindxPlus;
                 cfg.indx = 0;
                 print_title(cfg)
             case {'std-'}
-                stds = std(varargin{1});
-                [~,cfg.columns] = sort(stds,'ascend');
+                if ~isfield(cfg,'std') %store to improve performance
+                    cfg.std = std(varargin{1});
+                end
+                if ~isfield(cfg,'stdindxMinus') %store to improve performance
+                    [~,cfg.stdindxMinus] = sort(cfg.std,'ascend');
+                end                
+                cfg.columns = cfg.stdindxMinus;
                 cfg.indx = 0;
                 print_title(cfg)
         end
@@ -193,11 +204,17 @@ switch event.Key
         print_title(cfg);
     %----------------------linewidth---------------------------------------
     case {'equal'}
+        if strcmp(cfg.showing,'help')
+            return
+        end
         cfg = update_lnwd(cfg,'+');
         %update current
         lines = findobj(gcf,'Type','Line');
         for l = 1:numel(lines); lines(l).LineWidth = cfg.lnwidths(cfg.lnwidthsIndx); end
     case {'hyphen'}
+        if strcmp(cfg.showing,'help')
+            return
+        end
         cfg = update_lnwd(cfg,'-');   
         lines = findobj(gcf,'Type','Line');
         for l = 1:numel(lines); lines(l).LineWidth = cfg.lnwidths(cfg.lnwidthsIndx); end
@@ -227,8 +244,7 @@ switch event.Key
                 cfg.showing = 'data';
                 cfg = plot_column(cfg,varargin{:});  
             otherwise
-                help_screen;
-                cfg.showing = 'help';
+                cfg = help_screen(cfg);
         end
     %--------------------------quit----------------------------------------    
     case {'q','escape'}
@@ -268,7 +284,6 @@ switch direction
             cfg.lnwidthsIndx = cfg.lnwidthsIndx +1; 
         end
 end
-cfg.showing = 'data';
 return
 end
 
