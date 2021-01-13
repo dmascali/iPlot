@@ -77,9 +77,9 @@ title_str(1:2) = [];
 figure_title = sprintf(['iPlot - variable(s): ',title_str]);
 if isempty(IPLOT_FIG_POS)
     defpos = get(groot, 'DefaultFigurePosition');
-    h = figure('Name',figure_title,'NumberTitle','off','MenuBar', 'None','Position', [defpos(1) defpos(2)-275 920 695]);
+    h = figure('Name',figure_title,'NumberTitle','off','MenuBar', 'None','ToolBar','none','Position', [defpos(1) defpos(2)-275 920 695]);
 else
-    h = figure('Name',figure_title,'NumberTitle','off','MenuBar', 'None','Position',IPLOT_FIG_POS);
+    h = figure('Name',figure_title,'NumberTitle','off','MenuBar', 'None','ToolBar','none','Position',IPLOT_FIG_POS);
 end
 
 %initialize config structure
@@ -100,6 +100,7 @@ cfg.ylim_mode = 'auto'; %auto or lock
 cfg.ylim = [];
 cfg.fft = [];
 cfg.Fs = 1;
+cfg.h = h;
 %----------------------------
 
 % print help screen
@@ -265,7 +266,7 @@ if strcmp(cfg.showing,'help')
     % do nothing
     return
 end
-title(['Modality: \bf',cfg.type,'     \rmColumn ordering: \bf',cfg.mode{1},'     \rmYlim: \bf',cfg.ylim_mode],'fontweight','normal'); 
+title(['Modality [F]: \bf',cfg.type,'     \rmColumn ordering [R]: \bf',cfg.mode{1},'     \rmYlim [E]: \bf',cfg.ylim_mode],'fontweight','normal'); 
 try % available in the 
     ax = gca;
     ax.TitleHorizontalAlignment = 'left'; ax.TitleHorizontalAlignment = 'left';
@@ -307,23 +308,26 @@ end
 
 function cfg = help_screen(cfg)
 cfg.showing = 'help';
+set(cfg.h,'ToolBar','none');
 clf;
 % plot functions in backgroun
-x = 0:0.1:4*pi;
-y = [4*sin(x);3*sin(2*x);2*sin(3*x);1*sin(4*x)]';
-plot(x,y,'linewidth',1.5);
+x = 0:0.1:1*pi;
+y = [4*sin(x);3*sin(2*x);2*sin(3*x);1*sin(4*x); -3.8*cos(x/3); -3.8*cos(x/2); -3.8*cos(x); -3.8*cos(x/4)]';
+y = [flipud(y);nan(30,size(y,2));y]; y = -y; 
+plot(y,'linewidth',2);
 ylim([-13, 4.5]);
-xlim([0, x(end)]);
+xlim([1, length(y)]);
+set(gca,'Visible','off')
 %----------------------------
 %title
-text(0.5, 0.8,'\bfi\itPlot','FontSize',50,'HorizontalAlignment','center', 'Units', 'Normalized');
-text(0.5, 0.70,'Interactive Plot','FontSize',25,'HorizontalAlignment','center', 'Units', 'Normalized');
+text(0.5, 0.88,'\bfi\itPlot','FontSize',50,'HorizontalAlignment','center', 'Units', 'Normalized');
+text(0.5, 0.78,'Interactive Plot','FontSize',25,'HorizontalAlignment','center', 'Units', 'Normalized');
 
 %legend help
 text(0.5, 0.47,'\bfKeyboard Map','FontSize',12,'HorizontalAlignment','center', 'Units', 'Normalized');
 
 %left_colulm
-lf_entry_x = 0.05+0.1;
+lf_entry_x = 0.02+0.1;
 lf_entry_title_x = lf_entry_x -0.015; 
 
 rh_entry_x = 0.55+0.1;
@@ -354,8 +358,9 @@ text(rh_entry_x, entry_start_y-5.*deltay,'S - set frequency for fft','FontSize',
 text(rh_entry_x, entry_start_y-6.*deltay,'Q - quit','FontSize',entry_fontsize,'HorizontalAlignment','left', 'Units', 'Normalized');
 text(rh_entry_x, entry_start_y-7.*deltay,'H - show this help','FontSize',entry_fontsize,'HorizontalAlignment','left', 'Units', 'Normalized');
 
+text(1,0,'\itD. Mascali - 2021','HorizontalAlignment','right', 'Units', 'Normalized','FontSize',7.5);
 
-set(gca,'Xtick',[],'Ytick',[], 'XtickLabel',{},'YtickLabel',{},'box','on');
+set(gca,'Xtick',[],'Ytick',[], 'XtickLabel',{},'YtickLabel',{});
 return
 end
 
@@ -397,7 +402,7 @@ switch cfg.showingLegend{1}
     case {false}
         legend off;
 end
-
+set(cfg.h,'ToolBar','figure');
 return
 end
 
