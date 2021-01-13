@@ -94,10 +94,18 @@ title_str(1:2) = [];
 figure_title = sprintf(['iPlot - variable(s): ',title_str]);
 if isempty(IPLOT_FIG_POS)
     defpos = get(groot, 'DefaultFigurePosition');
-    h = figure('Name',figure_title,'NumberTitle','off','MenuBar', 'None','ToolBar','none','Position', [defpos(1) defpos(2)-275 900 556]);
+    h = figure('Name',figure_title,'NumberTitle','off','MenuBar', 'None','ToolBar','figure','Position', [defpos(1) defpos(2)-275 900 556]);
 else
-    h = figure('Name',figure_title,'NumberTitle','off','MenuBar', 'None','ToolBar','none','Position',IPLOT_FIG_POS);
+    h = figure('Name',figure_title,'NumberTitle','off','MenuBar', 'None','ToolBar','figure','Position',IPLOT_FIG_POS);
 end
+% remove unwanted buttons on the toolbar
+set(groot,'ShowHiddenHandles','on');
+tbh = findobj(h.Children,'Type','uitoolbar');
+ttZoomIn = findobj(tbh.Children,'Tag','Exploration.ZoomIn');
+ttZoomOut = findobj(tbh.Children,'Tag','Exploration.ZoomOut');
+ttPan = findobj(tbh.Children,'Tag','Exploration.Pan');
+ttDataCursor = findobj(tbh.Children,'Tag','Exploration.DataCursor');
+delete(setdiff(tbh.Children,[ttZoomIn ttZoomOut ttPan ttDataCursor]));
 %--------------------------------------------------------------------------
 
 %initialize config structure-----------------------------------------------
