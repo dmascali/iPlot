@@ -77,7 +77,7 @@ title_str(1:2) = [];
 figure_title = sprintf(['iPlot - variable(s): ',title_str]);
 if isempty(IPLOT_FIG_POS)
     defpos = get(groot, 'DefaultFigurePosition');
-    h = figure('Name',figure_title,'NumberTitle','off','MenuBar', 'None','ToolBar','none','Position', [defpos(1) defpos(2)-275 920 695]);
+    h = figure('Name',figure_title,'NumberTitle','off','MenuBar', 'None','ToolBar','none','Position', [defpos(1) defpos(2)-275 900 556]);
 else
     h = figure('Name',figure_title,'NumberTitle','off','MenuBar', 'None','ToolBar','none','Position',IPLOT_FIG_POS);
 end
@@ -249,7 +249,7 @@ switch event.Key
         end
     %--------------------------quit----------------------------------------    
     case {'q','escape'}
-        % before exiting save 
+        % before exiting save figure position for future calls
         IPLOT_FIG_POS = src.Position;
         close(gcf); 
         return
