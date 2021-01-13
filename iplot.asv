@@ -119,10 +119,10 @@ cfg = guidata(src);
 switch event.Key
     %--------------------------navigate------------------------------------
     case {'a','leftarrow'} %backward
-        cfg = update_column(cfg,'-');
+        cfg = update_cfg_a(cfg);
         cfg = plot_column(cfg,varargin{:});        
     case {'d','rightarrow'} %forward
-        cfg = update_column(cfg,'+');
+        cfg = update_cfg_d(cfg);
         cfg = plot_column(cfg,varargin{:});
     %----------------------------raw/fft-----------------------------------
     case {'f'} %switch bettwen raw data plotting and spectrum
@@ -193,12 +193,12 @@ switch event.Key
         print_title(cfg);
     %----------------------linewidth---------------------------------------
     case {'equal'}
-        cfg = update_lnwd(cfg,'+');
+        cfg = update_lnwd_plus(cfg);
         %update current
         lines = findobj(gcf,'Type','Line');
         for l = 1:numel(lines); lines(l).LineWidth = cfg.lnwidths(cfg.lnwidthsIndx); end
     case {'hyphen'}
-        cfg = update_lnwd(cfg,'-');   
+        cfg = update_lnwd_minus(cfg);   
         lines = findobj(gcf,'Type','Line');
         for l = 1:numel(lines); lines(l).LineWidth = cfg.lnwidths(cfg.lnwidthsIndx); end
     %----------------------set param---------------------------------------
@@ -231,7 +231,7 @@ switch event.Key
                 cfg.showing = 'help';
         end
     %--------------------------quit----------------------------------------    
-    case {'q','escape'}
+    case {'q'}
         % before exiting save 
         IPLOT_FIG_POS = src.Position;
         close(gcf); 
@@ -257,22 +257,32 @@ end
 return
 end
 
-function cfg = update_lnwd(cfg,direction)
-switch direction 
-    case {'-'}
-        if cfg.lnwidthsIndx ~= 1
-            cfg.lnwidthsIndx = cfg.lnwidthsIndx -1; 
-        end
-    case {'+'}
-        if cfg.lnwidthsIndx ~= length(cfg.lnwidths)
-            cfg.lnwidthsIndx = cfg.lnwidthsIndx +1; 
-        end
+function cfg = update_lnwd_plus(cfg)
+if cfg.lnwidthsIndx ~= length(cfg.lnwidths)
+    cfg.lnwidthsIndx = cfg.lnwidthsIndx +1; 
+end
+cfg.showing = 'data';
+return
+end
+
+function cfg = update_lnwd_minus(cfg)
+if cfg.lnwidthsIndx ~= 1
+    cfg.lnwidthsIndx = cfg.lnwidthsIndx -1; 
+end
+cfg.showing = 'data';
+return
+end
+
+function cfg = update_cfg_d(cfg)
+if cfg.indx ~= cfg.indx_max
+    cfg.indx = cfg.indx +1; 
 end
 cfg.showing = 'data';
 return
 end
 
 function cfg = update_column(cfg,direction)
+
 switch direction 
     case {'-'}
         if cfg.indx > 1
@@ -281,14 +291,11 @@ switch direction
         if cfg.indx == 0
             cfg.indx = 1; 
         end
-    case {'+'}
-        if cfg.indx ~= cfg.indx_max
-            cfg.indx = cfg.indx +1; 
-        end
-end
+    case {ì
 cfg.showing = 'data';
 return
 end
+
 
 function cfg = help_screen(cfg)
 cfg.showing = 'help';
@@ -410,3 +417,6 @@ end
 
 return
 end
+
+ 
+
