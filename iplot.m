@@ -333,7 +333,7 @@ y = [flipud(y);nan(30,size(y,2));y]; y = -y;
 plot(y,'linewidth',2);
 ylim([-13, 4.5]);
 xlim([1, length(y)]);
-set(gca,'Visible','off')
+set(gca,'Visible','off','Position', [0.1125 0.11 0.775 0.8150]);
 %----------------------------
 %title
 text(0.5, 0.88,'\bfi\itPlot','FontSize',50,'HorizontalAlignment','center', 'Units', 'Normalized');
