@@ -1,6 +1,6 @@
 function iplot(varargin)
 %IPLOT(X) plots the columns in X (or their spectral amplitude) interactively,
-% one at a time. 
+% one at a time. X can be a matrix or a vector. 
 %IPLOT(X,Y,...) plots the columns from X,Y..., one above the other for easy 
 % comparison.
 %
@@ -45,8 +45,22 @@ end
 
 global IPLOT_FIG_POS 
 
+%-------------scalar values are not allowed--------------------------------
+isScalar = cellfun(@isscalar,varargin);
+if sum(isScalar) > 0
+    error('Input %d is a scalar, iPlot accepts vectors or matrices.',find(isScalar,1));
+end
+%--------------------------------------------------------------------------
+
+%If vectors are used make them all column vectors (transpose row vectors)
+isVect = cellfun(@isvector,varargin);
+isRow = cellfun(@isrow,varargin);
+isVectIsRow = logical(isVect.*isRow);
+varargin(isVectIsRow) = cellfun(@transpose,varargin(isVectIsRow),'UniformOutput',false);
+%--------------------------------------------------------------------------
+
+%check dimension consistency among matrices--------------------------------
 if nargin > 1
-    %check dimension consistency among matrices
     for l = 2:nargin
         if ~isequal(size(varargin{l-1}),size(varargin{l}))
             in1 = inputname(l-1); in2 = inputname(l);
@@ -58,6 +72,7 @@ if nargin > 1
         end
     end 
 end
+%--------------------------------------------------------------------------
 % Number of input matrices
 nVariable = nargin;
 s = size(varargin{1});
@@ -73,7 +88,9 @@ for l = 1:nVariable
     title_str = [title_str,', ',labels{l}];
 end
 title_str(1:2) = [];
+%--------------------------------------------------------------------------
 
+% Initialize figure--------------------------------------------------------
 figure_title = sprintf(['iPlot - variable(s): ',title_str]);
 if isempty(IPLOT_FIG_POS)
     defpos = get(groot, 'DefaultFigurePosition');
@@ -81,8 +98,9 @@ if isempty(IPLOT_FIG_POS)
 else
     h = figure('Name',figure_title,'NumberTitle','off','MenuBar', 'None','ToolBar','none','Position',IPLOT_FIG_POS);
 end
+%--------------------------------------------------------------------------
 
-%initialize config structure
+%initialize config structure-----------------------------------------------
 % for cell arrays of strings, the first cell is the current running property
 cfg.showing = '';
 cfg.showingLegend = {false,true};
@@ -101,15 +119,13 @@ cfg.ylim = [];
 cfg.fft = [];
 cfg.Fs = 1;
 cfg.h = h;
-%----------------------------
-
+%--------------------------------------------------------------------------
 % print help screen
 cfg = help_screen(cfg);
-
+%--------------------------------------------------------------------------
 %wait for key press
 guidata(h,cfg);
 set(h,'KeyPressFcn',{@switcher,varargin{:}});
-
 return
 end
 
