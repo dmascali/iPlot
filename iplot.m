@@ -1,38 +1,46 @@
 function iplot(varargin)
-%IPLOT(X) plots the columns in X (or their spectral amplitude) interactively,
-% one at a time. X can be a matrix or a vector. 
-%IPLOT(X,Y,...) plots the columns from X,Y..., one above the other for easy 
-% comparison.
+%IPLOT   Interactive Plot.
+%   IPLOT(Y) plots the columns of Y versus their index interactively.
 %
-%IPLOT functionalities are triggered by pressing the following keys:
+%   IPLOT(Y) followed by pressing the "F" key plots the spectral amplitude
+%   of the current column. 
 %
-% Navigate through columns:
-%  D : plot the next column
-%  A : plot the previous column
-%  R : toggle between different column ordering:
-%      sequential: from 1 to N (number of columns) {default}
-%      std+      : column sorted by variance (of the first input), descending 
-%      std-      : column sorted by variance (of the first input), ascending 
-%      random    : random ordering 
+%   IPLOT(Y,Z,...) plots the columns of Y,Z..., one above the other for 
+%   easy comparison.
 %
-% Plotting mode:
-%  F : toogle between plotting modality:
-%      raw : plot raw column {default}
-%      fft : plot the spectral amplitude of the column
+%   IPLOT functionalities are triggered by pressing the following keys:
 %
-% Appearance:
-%  E :  toogle between y-limit modality:
-%       auto : automatically adjust limits {default}
-%       lock : lock the current y-limits (you can also specify limits at
-%              the matlab command window: ylim([a b]) and then locking them)
-%  L :  show legend 
-%  +/-: adjust linewidth
+%   Navigate through columns:
+%       D : plot the next column
+%       A : plot the previous column
+%       R : toggle between different column ordering:
+%           sequential: from 1 to N (number of columns) {default}
+%           std+      : column sorted by variance (of the first input),
+%                       descending order 
+%           std-      : column sorted by variance (of the first input),
+%                       ascending order
+%           random    : random ordering 
 %
-% Miscellaneous:
-%  S : open a dialog box for specifying the sampling frequency (so that 
-%      spectra reflect real frequencies)
-%  Q : quit
-%  H : show help
+%   Plotting mode:
+%       F : toogle between plotting modality:
+%           raw : plot raw column {default}
+%           fft : plot the spectral amplitude of the column
+%
+%   Appearance:
+%       E :  toogle between y-limit modality:
+%               auto : automatically adjust limits {default}
+%               lock : lock the current y-limits (you might also specify 
+%                      limits at the matlab command window: ylim([a b] 
+%                      and then locking them)
+%       L :  show legend 
+%       +/-: adjust linewidth
+%
+%   Miscellaneous:
+%       S : open a dialog box for specifying the sampling frequency (so 
+%           that spectra reflect real frequencies)
+%       Q : quit
+%       H : show help
+
 %__________________________________________________________________________
 % Daniele Mascali
 % ITAB, Chieti, 2021 
