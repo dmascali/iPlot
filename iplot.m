@@ -38,6 +38,11 @@ function iplot(varargin)
 % ITAB, Chieti, 2021 
 % danielemascali@gmail.com
 
+if nargin == 0
+    help(mfilename);
+    return
+end
+
 global IPLOT_FIG_POS 
 
 if nargin > 1
