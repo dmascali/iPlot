@@ -32,6 +32,7 @@ function iplot(varargin)
 %               lock : lock the current y-limits (you might also specify 
 %                      limits at the matlab command window: ylim([a b] 
 %                      and then locking them)
+%            NB: each plotting mode (i.e., raw/fft) has its own lock
 %       L :  show legend 
 %       +/-: adjust linewidth
 %
@@ -117,11 +118,11 @@ delete(setdiff(tbh.Children,[ttZoomIn ttZoomOut ttPan ttDataCursor]));
 %--------------------------------------------------------------------------
 
 %initialize config structure-----------------------------------------------
-% for cell arrays of strings, the first cell is the current running property
+% * for starred variable, the first cell is the current running property
 cfg.showing = '';
-cfg.showingLegend = {false,true};
+cfg.showingLegend = {false,true}; % *
 cfg.type = 'raw'; %raw or fft
-cfg.mode = {'seq','std+','std-','random'};%,'stdA','stdD'}; %seq, random, std
+cfg.mode = {'seq','std+','std-','random'}; % *
 cfg.columns = 1:1:s(2);
 cfg.indx = 0;
 cfg.indx_max = s(2); %number of columns
@@ -130,8 +131,8 @@ cfg.nVariable = nVariable;
 cfg.labels = labels;
 cfg.lnwidths = [0.5 0.6 0.7 0.8 0.9 1 1.2 1.4 1.6 1.8 2 2.5 3 4];
 cfg.lnwidthsIndx = find(cfg.lnwidths==1);
-cfg.ylim_mode = 'auto'; %auto or lock
-cfg.ylim = [];
+cfg.ylim_mode = {'auto','auto'}; %auto or lock, one for raw and fft 
+cfg.ylim = {[],[]}; %for raw and fft
 cfg.fft = [];
 cfg.Fs = 1;
 cfg.h = h;
@@ -227,12 +228,18 @@ switch event.Key
         if strcmp(cfg.showing,'help')
             return
         end
-        switch cfg.ylim_mode
+        switch cfg.type
+            case {'raw'}
+                in = 1;
+            case {'fft'}
+                in = 2;
+        end
+        switch cfg.ylim_mode{in}
             case {'auto'}
-                cfg.ylim_mode = 'lock';
-                cfg.ylim = get(gca,'ylim');
+                cfg.ylim_mode{in} = 'lock';
+                cfg.ylim{in} = get(gca,'ylim');
             case {'lock'}
-                cfg.ylim_mode = 'auto';
+                cfg.ylim_mode{in} = 'auto';
         end
         print_title(cfg);
     %----------------------linewidth---------------------------------------
@@ -298,7 +305,13 @@ if strcmp(cfg.showing,'help')
     % do nothing
     return
 end
-title(['Modality [F]: \bf',cfg.type,'     \rmColumn ordering [R]: \bf',cfg.mode{1},'     \rmYlim [E]: \bf',cfg.ylim_mode],'fontweight','normal'); 
+switch cfg.type
+    case {'raw'}
+        in = 1;
+    case {'fft'}
+        in = 2;
+end
+title(['Modality [F]: \bf',cfg.type,'     \rmColumn ordering [R]: \bf',cfg.mode{1},'     \rmYlim [E]: \bf',cfg.ylim_mode{in}],'fontweight','normal'); 
 try % available in the 
     ax = gca;
     ax.TitleHorizontalAlignment = 'left'; ax.TitleHorizontalAlignment = 'left';
@@ -411,6 +424,10 @@ switch cfg.type
         ylabel(['Column \bf',num2str(cfg.columns(cfg.indx)),'/',num2str(cfg.indx_max)],'Fontweight','normal');
         xlabel('row');
         xlim([1 cfg.row_number]);
+        switch cfg.ylim_mode{1}
+            case {'lock'}
+                ylim(cfg.ylim{1});
+        end
     case {'fft'}
         hold on;
         for l = 1:cfg.nVariable
@@ -419,12 +436,12 @@ switch cfg.type
         hold off;
         xlabel(['Frequency (Hz) [sampling freq=',num2str(cfg.Fs),'Hz]']);
         ylabel(['Spectrum, column \bf',num2str(cfg.columns(cfg.indx)),'/',num2str(cfg.indx_max)],'Fontweight','normal');
+        switch cfg.ylim_mode{2}
+            case {'lock'}
+                ylim(cfg.ylim{2});
+        end
 end
 
-switch cfg.ylim_mode
-    case {'lock'}
-        ylim(cfg.ylim);
-end
 print_title(cfg);
 box on;
 
@@ -444,6 +461,8 @@ y = [];
 for l = 1:cfg.nVariable
     y = cat(2,y,varargin{l});
 end
+%remove the mean
+y = y -mean(y);
 
 n = 2^nextpow2(cfg.row_number);
 
