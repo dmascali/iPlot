@@ -107,14 +107,18 @@ if isempty(IPLOT_FIG_POS)
 else
     h = figure('Name',figure_title,'NumberTitle','off','MenuBar', 'None','ToolBar','figure','Position',IPLOT_FIG_POS);
 end
-% remove unwanted buttons on the toolbar
-set(groot,'ShowHiddenHandles','on');
-tbh = findobj(h.Children,'Type','uitoolbar');
-ttZoomIn = findobj(tbh.Children,'Tag','Exploration.ZoomIn');
-ttZoomOut = findobj(tbh.Children,'Tag','Exploration.ZoomOut');
-ttPan = findobj(tbh.Children,'Tag','Exploration.Pan');
-ttDataCursor = findobj(tbh.Children,'Tag','Exploration.DataCursor');
-delete(setdiff(tbh.Children,[ttZoomIn ttZoomOut ttPan ttDataCursor]));
+try
+    % remove unwanted buttons on the toolbar
+    set(groot,'ShowHiddenHandles','on');
+    tbh = findobj(h.Children,'Type','uitoolbar');
+    ttZoomIn = findobj(tbh.Children,'Tag','Exploration.ZoomIn');
+    ttZoomOut = findobj(tbh.Children,'Tag','Exploration.ZoomOut');
+    ttPan = findobj(tbh.Children,'Tag','Exploration.Pan');
+    ttDataCursor = findobj(tbh.Children,'Tag','Exploration.DataCursor');
+    delete(setdiff(tbh.Children,[ttZoomIn ttZoomOut ttPan ttDataCursor]));
+catch
+    % not working in old matlab version
+end
 %--------------------------------------------------------------------------
 
 %initialize config structure-----------------------------------------------
@@ -179,7 +183,7 @@ switch event.Key
         if strcmp(cfg.showing,'help')
             return
         end
-        cfg.mode = circshift(cfg.mode,-1);
+        cfg.mode = circshift(cfg.mode,[1,-1]);
         switch cfg.mode{1}
             case {'seq'}
                 cfg.columns = 1:1:cfg.indx_max;
@@ -216,7 +220,7 @@ switch event.Key
         if strcmp(cfg.showing,'help')
             return
         end
-        cfg.showingLegend = circshift(cfg.showingLegend,-1);
+        cfg.showingLegend = circshift(cfg.showingLegend,[1,-1]);
         switch cfg.showingLegend{1}
             case {true} 
                 legend(cfg.labels,'location','best');
@@ -244,20 +248,9 @@ switch event.Key
         print_title(cfg);
     %----------------------linewidth---------------------------------------
     case {'equal'}
-        if strcmp(cfg.showing,'help')
-            return
-        end
         cfg = update_lnwd(cfg,'+');
-        %update current
-        lines = findobj(gcf,'Type','Line');
-        for l = 1:numel(lines); lines(l).LineWidth = cfg.lnwidths(cfg.lnwidthsIndx); end
     case {'hyphen'}
-        if strcmp(cfg.showing,'help')
-            return
-        end
-        cfg = update_lnwd(cfg,'-');   
-        lines = findobj(gcf,'Type','Line');
-        for l = 1:numel(lines); lines(l).LineWidth = cfg.lnwidths(cfg.lnwidthsIndx); end
+        cfg = update_lnwd(cfg,'-');            
     %----------------------set param---------------------------------------
     case {'s'}
         prompt = {'Enter sampling frequency (Hz):'};
@@ -289,7 +282,11 @@ switch event.Key
     %--------------------------quit----------------------------------------    
     case {'q','escape'}
         % before exiting save figure position for future calls
-        IPLOT_FIG_POS = src.Position;
+        try
+            IPLOT_FIG_POS = src.Position;
+        catch 
+            IPLOT_FIG_POS = get(gcf,'Position');
+        end
         close(gcf); 
         return
 end
@@ -313,13 +310,17 @@ switch cfg.type
 end
 title(['Modality [F]: \bf',cfg.type,'     \rmColumn ordering [R]: \bf',cfg.mode{1},'     \rmYlim [E]: \bf',cfg.ylim_mode{in}],'fontweight','normal'); 
 try % available in the 
-    ax = gca;
-    ax.TitleHorizontalAlignment = 'left'; ax.TitleHorizontalAlignment = 'left';
+    %ax = gca;
+    set(gca,'TitleHorizontalAlignment','left');
+    %ax.TitleHorizontalAlignment = 'left';
 end
 return
 end
 
 function cfg = update_lnwd(cfg,direction)
+if strcmp(cfg.showing,'help')
+    return
+end
 switch direction 
     case {'-'}
         if cfg.lnwidthsIndx ~= 1
@@ -329,6 +330,13 @@ switch direction
         if cfg.lnwidthsIndx ~= length(cfg.lnwidths)
             cfg.lnwidthsIndx = cfg.lnwidthsIndx +1; 
         end
+end
+%update current
+lines = findobj(gcf,'Type','Line');
+try
+    for l = 1:numel(lines); lines(l).LineWidth = cfg.lnwidths(cfg.lnwidthsIndx); end
+catch 
+    for l = 1:numel(lines); set(lines(l),'linewidth',cfg.lnwidths(cfg.lnwidthsIndx)); end
 end
 return
 end
@@ -416,7 +424,7 @@ if cfg.indx <= 0 %take care of odd situations where indx = 0
 end
 switch cfg.type
     case {'raw'}
-        hold on;
+        try hold all; catch; hold on; end; % old versions of matlab require hold all to plot lines with different colors
         for l = 1:cfg.nVariable
             plot(varargin{l}(:,cfg.columns(cfg.indx)),'linewidth',cfg.lnwidths(cfg.lnwidthsIndx));
         end
@@ -429,7 +437,7 @@ switch cfg.type
                 ylim(cfg.ylim{1});
         end
     case {'fft'}
-        hold on;
+        try hold all; catch; hold on; end;
         for l = 1:cfg.nVariable
             plot(cfg.freq,cfg.fft{l}(:,cfg.columns(cfg.indx)),'linewidth',cfg.lnwidths(cfg.lnwidthsIndx));
         end
@@ -462,7 +470,7 @@ for l = 1:cfg.nVariable
     y = cat(2,y,varargin{l});
 end
 %remove the mean
-y = y -mean(y);
+y = bsxfun(@minus, y,mean(y));
 
 n = 2^nextpow2(cfg.row_number);
 
