@@ -133,7 +133,7 @@ cfg.indx_max = s(2); %number of columns
 cfg.row_number = s(1); %number of rows
 cfg.nVariable = nVariable;
 cfg.labels = labels;
-cfg.lnwidths = [0.5 0.6 0.7 0.8 0.9 1 1.2 1.4 1.6 1.8 2 2.5 3 4];
+cfg.lnwidths = [0.5 0.8 0.9 1 1.2 1.4 1.6 1.8 2 2.5 3 4];
 cfg.lnwidthsIndx = find(cfg.lnwidths==1);
 cfg.ylim_mode = {'auto','auto'}; %auto or lock, one for raw and fft 
 cfg.ylim = {[],[]}; %for raw and fft
@@ -247,7 +247,7 @@ switch event.Key
         end
         print_title(cfg);
     %----------------------linewidth---------------------------------------
-    case {'equal'}
+    case {'equal','0'}   %not sure why sometimes it's a zero!
         cfg = update_lnwd(cfg,'+');
     case {'hyphen'}
         cfg = update_lnwd(cfg,'-');            
