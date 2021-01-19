@@ -1,5 +1,5 @@
 # iPlot - Interactive Plot
-*iPlot* is a matlab tool for plotting 1-D or 2-D matrices interactively. Data is plotted versus row indexes. 
+*iPlot* is a MATLAB tool for plotting 1-D or 2-D matrices interactively. Data is plotted versus row indices. 
 
 - `iplot(X)` plots the columns in X (or their spectral amplitude) interactively, one at a time. X can be a matrix or a vector. 
 - `iplot(X,Y,...)` plots the columns in X,Y..., one above the other for easy comparison.
