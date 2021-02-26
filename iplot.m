@@ -52,7 +52,8 @@ if nargin == 0
     return
 end
 
-global IPLOT_FIG_POS 
+global IPLOT_FIG_POS IPLOT_FIRST_CALL
+%the second variable serves to show the help only on the first call 
 
 %-------------scalar values are not allowed--------------------------------
 isScalar = cellfun(@isscalar,varargin);
@@ -142,7 +143,13 @@ cfg.Fs = 1;
 cfg.h = h;
 %--------------------------------------------------------------------------
 % print help screen
-cfg = help_screen(cfg);
+if isempty(IPLOT_FIRST_CALL) %first call to iplot, let's show the help
+    cfg = help_screen(cfg);
+    IPLOT_FIRST_CALL = 1;
+else
+    cfg = update_column(cfg,'+');
+    cfg = plot_column(cfg,varargin{:});
+end
 %--------------------------------------------------------------------------
 %wait for key press
 guidata(h,cfg);
@@ -302,7 +309,7 @@ switch cfg.type
     case {'fft'}
         in = 2;
 end
-title(['Modality [F]: \bf',cfg.type,'     \rmColumn ordering [R]: \bf',cfg.mode{1},'     \rmYlim [E]: \bf',cfg.ylim_mode{in}],'fontweight','normal'); 
+title(['Modality [F]: \bf',cfg.type,'     \rmColumn ordering [R]: \bf',cfg.mode{1},'     \rmYlim [E]: \bf',cfg.ylim_mode{in},'     \rmHelp [H]'],'fontweight','normal'); 
 try % available in the 
     %ax = gca;
     set(gca,'TitleHorizontalAlignment','left');
