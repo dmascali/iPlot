@@ -103,9 +103,9 @@ title_str(1:2) = [];
 figure_title = sprintf(['iPlot - variable(s): ',title_str]);
 if isempty(IPLOT_FIG_POS)
     defpos = get(groot, 'DefaultFigurePosition');
-    h = figure('Name',figure_title,'NumberTitle','off','MenuBar', 'None','ToolBar','figure','Position', [defpos(1) defpos(2)-275 900 556]);
+    h = figure('Name',figure_title,'NumberTitle','off','MenuBar', 'None','ToolBar','figure','CloseRequestFcn',@SaveCgfPosition,'Position', [defpos(1) defpos(2)-275 900 556]);
 else
-    h = figure('Name',figure_title,'NumberTitle','off','MenuBar', 'None','ToolBar','figure','Position',IPLOT_FIG_POS);
+    h = figure('Name',figure_title,'NumberTitle','off','MenuBar', 'None','ToolBar','figure','CloseRequestFcn',@SaveCgfPosition,'Position',IPLOT_FIG_POS);
 end
 try
     % remove unwanted buttons on the toolbar
@@ -281,13 +281,7 @@ switch event.Key
         end
     %--------------------------quit----------------------------------------    
     case {'q','escape'}
-        % before exiting save figure position for future calls
-        try
-            IPLOT_FIG_POS = src.Position;
-        catch 
-            IPLOT_FIG_POS = get(gcf,'Position');
-        end
-        close(gcf); 
+        SaveCgfPosition
         return
 end
 
@@ -487,5 +481,13 @@ for l = 1:cfg.nVariable
     Y(:,1:cfg.indx_max) = [];
 end
 
+return
+end
+
+function SaveCgfPosition(src,callbackdata)
+% before closing the figure save the current gcf position for next usage
+global IPLOT_FIG_POS 
+IPLOT_FIG_POS = get(gcf,'Position');
+delete(gcf)
 return
 end
