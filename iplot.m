@@ -1,12 +1,14 @@
 function iplot(varargin)
 %IPLOT   Interactive Plot.
-%   IPLOT(Y) plots the columns of Y versus their index interactively.
+%   IPLOT(Y) plots the columns of Y versus their indices interactively.
 %
 %   IPLOT(Y) followed by pressing the "F" key plots the spectral amplitude
 %   of the current column. 
 %
-%   IPLOT(Y,Z,...) plots the columns of Y,Z..., one above the other for 
-%   easy comparison.
+%   IPLOT(Y,Z, ...) plots the columns of Y,Z..., one above the other for 
+%   easy comparison. All matrices must have equal size. One exception is 
+%   allowed: if an input matrix other than Y is vectors, then 
+%   the vector is replicated to match the number of columns in Y. 
 %
 %   IPLOT functionalities are triggered by pressing the following keys:
 %
@@ -73,11 +75,17 @@ varargin(isVectIsRow) = cellfun(@transpose,varargin(isVectIsRow),'UniformOutput'
 if nargin > 1
     for l = 2:nargin
         if ~isequal(size(varargin{l-1}),size(varargin{l}))
-            in1 = inputname(l-1); in2 = inputname(l);
-            if ~isempty(in1) && ~isempty(in2)
-                error(['Matrix ''',in1,''' has a different size from ''',in2,'''.']); 
-            else
-                error('Input matrices have different dimensions.');
+            %if the two inputs have the same number of rows but the second input
+            % is a vector (just one column) we can replicate that column
+            if isvector(varargin{l}) && length(varargin{l}) == size(varargin{l-1},1)
+                varargin{l} = repmat(varargin{l},[1 size(varargin{l-1},2)]);
+            else %otherwise exit
+                in1 = inputname(l-1); in2 = inputname(l);
+                if ~isempty(in1) && ~isempty(in2)
+                    error(['Matrix ''',in1,''' has a different size from ''',in2,'''.']); 
+                else
+                    error('Input matrices have different dimensions.');
+                end
             end
         end
     end 
